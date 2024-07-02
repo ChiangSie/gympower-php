@@ -1,47 +1,52 @@
 <?php
-header('Content-Type: application/json');
+// add_admin.php
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Content-Type: application/json; charset=UTF-8");
 
-// 資料庫連接設定
+// 確保僅處理POST請求
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['code' => 405, 'msg' => 'Method Not Allowed']);
+    exit();
+}
+
+// 讀取JSON輸入
+$data = json_decode(file_get_contents("php://input"), true);
+
+if (!isset($data['id']) || !isset($data['acc']) || !isset($data['psw']) || !isset($data['status'])) {
+    http_response_code(400);
+    echo json_encode(['code' => 400, 'msg' => 'Bad Request']);
+    exit();
+}
+
+// 連接資料庫
 $servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "g5";
+$username = "your_username";
+$password = "your_password";
+$dbname = "your_database";
 
-// 創建連接
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// 檢查連接
 if ($conn->connect_error) {
-    die(json_encode(['success' => false, 'message' => "連接失敗: " . $conn->connect_error]));
+    http_response_code(500);
+    echo json_encode(['code' => 500, 'msg' => 'Internal Server Error']);
+    exit();
 }
 
-// 獲取POST數據
-$data = json_decode(file_get_contents('php://input'), true);
+$id = $conn->real_escape_string($data['id']);
+$acc = $conn->real_escape_string($data['acc']);
+$psw = password_hash($conn->real_escape_string($data['psw']), PASSWORD_DEFAULT); // 密碼加密
+$status = (int) $data['status'];
 
-// 驗證數據
-if (empty($data['id']) || empty($data['acc']) || empty($data['psw'])) {
-    echo json_encode(['success' => false, 'message' => '所有欄位都必須填寫']);
-    exit;
-}
+$sql = "INSERT INTO admin_table (am_id, am_acc, am_psw, am_status) VALUES ('$id', '$acc', '$psw', '$status')";
 
-// 準備SQL語句
-$stmt = $conn->prepare("INSERT INTO admin_table (am_id, am_acc, am_psw, am_status) VALUES (?, ?, ?, ?)");
-$stmt->bind_param("sssi", $data['id'], $data['acc'], $data['psw'], $data['status']);
-
-// 執行SQL
-if ($stmt->execute()) {
-    $newAdmin = [
-        'am_no' => $stmt->insert_id,
-        'am_id' => $data['id'],
-        'am_acc' => $data['acc'],
-        'am_psw' => $data['psw'],
-        'am_status' => $data['status']
-    ];
-    echo json_encode(['success' => true, 'admin' => $newAdmin]);
+if ($conn->query($sql) === TRUE) {
+    echo json_encode(['code' => 200, 'msg' => 'New record created successfully']);
 } else {
-    echo json_encode(['success' => false, 'message' => '新增失敗: ' . $stmt->error]);
+    echo json_encode(['code' => 500, 'msg' => 'Error: ' . $sql . '<br>' . $conn->error]);
 }
 
-$stmt->close();
 $conn->close();
 ?>
