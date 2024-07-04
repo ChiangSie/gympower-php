@@ -17,12 +17,12 @@ try {
     ];
 
     // SQL查詢
-    $sql = "SELECT * FROM course c1 join coach c2 on c1.coach_id = c2.coach_id ";
-    $courses = $pdo->query($sql);
-    $courseRows = $courses->fetchAll(PDO::FETCH_ASSOC);
+    $sql = "SELECT * FROM course_order ";
+    $courseords = $pdo->query($sql);
+    $courseordRows = $courseords->fetchAll(PDO::FETCH_ASSOC);
 
     // 將查詢結果賦值給返回資料
-    $returnData['data']['list'] = $courseRows;
+    $returnData['data']['list'] = $courseordRows;
 } catch (Exception $e) {
     // 捕獲異常並設置錯誤代碼和錯誤信息
     $returnData['code'] = 10003;

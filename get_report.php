@@ -17,7 +17,7 @@ try {
     ];
 
     // SQL查詢
-    $sql = "SELECT * FROM report r JOIN member m on r.r_memid = m.mem_id JOIN diary d on r.dm_id = d.dm_id and r.r_content = d.dm_content";
+    $sql = "SELECT * FROM report r JOIN member m on r.r_memid = m.mem_id JOIN diary d on r.dm_id = d.dm_id and r.r_content = d.dm_content" ;
     $reports = $pdo->query($sql);
     $reportRows = $reports->fetchAll(PDO::FETCH_ASSOC);
 
