@@ -17,7 +17,7 @@ try {
     ];
 
     // SQL查詢
-    $sql = "SELECT * FROM course_order ";
+    $sql = "SELECT * FROM course_order";
     $courseords = $pdo->query($sql);
     $courseordRows = $courseords->fetchAll(PDO::FETCH_ASSOC);
 

@@ -1,52 +1,52 @@
 <?php
-// add_admin.php
-header("Access-Control-Allow-Origin: http://localhost:5173");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
-header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Methods: POST");
+header("Content-Type: application/json;charset=UTF-8");
 
-// 確保僅處理POST請求
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['code' => 405, 'msg' => 'Method Not Allowed']);
-    exit();
-}
+// Database connection
+require_once("connect_cid101g5.php");
 
-// 讀取JSON輸入
+// Retrieve POST data
 $data = json_decode(file_get_contents("php://input"), true);
 
-if (!isset($data['id']) || !isset($data['acc']) || !isset($data['psw']) || !isset($data['status'])) {
-    http_response_code(400);
-    echo json_encode(['code' => 400, 'msg' => 'Bad Request']);
-    exit();
+try {
+    // Extract data
+    $am_id = $data["id"];
+    $am_acc = $data["acc"];
+    $am_psw = $data["psw"];
+    $am_status = isset($data["status"]) ? $data["status"] : 1; // Default status
+
+    // Check if account already exists
+    $checkSql = "SELECT COUNT(*) FROM admin WHERE am_acc = :am_acc";
+    $checkStmt = $pdo->prepare($checkSql);
+    $checkStmt->execute([':am_acc' => $am_acc]);
+    $count = $checkStmt->fetchColumn();
+
+    if ($count > 0) {
+        $result = ["error" => true, "msg" => "帳號名稱已被使用"];
+    } else {
+        // Get the maximum am_no value
+        $maxAmNoSql = "SELECT MAX(am_no) AS max_am_no FROM admin";
+        $maxAmNoStmt = $pdo->query($maxAmNoSql);
+        $maxAmNo = $maxAmNoStmt->fetchColumn() + 1;
+
+        // Insert new admin record
+        $sql = "INSERT INTO admin (am_no, am_id, am_acc, am_psw, am_status) VALUES (:am_no, :am_id, :am_acc, :am_psw, :am_status)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(":am_no", $maxAmNo);
+        $stmt->bindValue(":am_id", $am_id);
+        $stmt->bindValue(":am_acc", $am_acc);
+        $stmt->bindValue(":am_psw", $am_psw);
+        $stmt->bindValue(":am_status", $am_status);
+        $stmt->execute();
+
+        $result = ["error" => false, "msg" => "新增成功"];
+    }
+} catch (PDOException $e) {
+    $result = ["error" => true, "msg" => "新增失敗：" . $e->getMessage()];
 }
 
-// 連接資料庫
-$servername = "localhost";
-$username = "your_username";
-$password = "your_password";
-$dbname = "your_database";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    http_response_code(500);
-    echo json_encode(['code' => 500, 'msg' => 'Internal Server Error']);
-    exit();
-}
-
-$id = $conn->real_escape_string($data['id']);
-$acc = $conn->real_escape_string($data['acc']);
-$psw = password_hash($conn->real_escape_string($data['psw']), PASSWORD_DEFAULT); // 密碼加密
-$status = (int) $data['status'];
-
-$sql = "INSERT INTO admin_table (am_id, am_acc, am_psw, am_status) VALUES ('$id', '$acc', '$psw', '$status')";
-
-if ($conn->query($sql) === TRUE) {
-    echo json_encode(['code' => 200, 'msg' => 'New record created successfully']);
-} else {
-    echo json_encode(['code' => 500, 'msg' => 'Error: ' . $sql . '<br>' . $conn->error]);
-}
-
-$conn->close();
+// Return result as JSON
+echo json_encode($result);
 ?>

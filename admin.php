@@ -18,15 +18,19 @@ if (!isset($data["u_account"]) || !isset($data["u_psw"])) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT am_id, am_acc, am_psw FROM admin WHERE am_acc = :uAccount AND am_psw = :uPsw");
+    $stmt = $pdo->prepare("SELECT am_id, am_acc, am_psw, am_status FROM admin WHERE am_acc = :uAccount AND am_psw = :uPsw");
     $stmt->bindValue(":uAccount", $data["u_account"]);
     $stmt->bindValue(":uPsw", $data["u_psw"]);
     $stmt->execute();
 
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($admin) {
-        unset($admin['am_psw']); // Remove password for security
-        echo json_encode(['code' => 1, 'adminInfo' => $admin]);
+        if ($admin['am_status'] == 0) {
+            echo json_encode(['code' => 0, 'msg' => '此帳號已被停權']);
+        } else {
+            unset($admin['am_psw']); // Remove password for security
+            echo json_encode(['code' => 1, 'adminInfo' => $admin]);
+        }
     } else {
         echo json_encode(['code' => 0, 'msg' => '帳號未找到或密碼錯誤']);
     }
