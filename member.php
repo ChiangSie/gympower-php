@@ -1,5 +1,5 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Origin: http://localhost:5174");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
@@ -18,18 +18,18 @@ if (!isset($data["u_account"]) || !isset($data["u_psw"])) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT am_id, am_acc, am_psw, am_status FROM admin WHERE am_acc = :uAccount AND am_psw = :uPsw");
+    $stmt = $pdo->prepare("SELECT mem_id, mem_acc, mem_psw, mem_status FROM member WHERE mem_acc = :uAccount AND mem_psw = :uPsw");
     $stmt->bindValue(":uAccount", $data["u_account"]);
     $stmt->bindValue(":uPsw", $data["u_psw"]);
     $stmt->execute();
 
-    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($admin) {
-        if ($admin['am_status'] == 0) {
+    $member = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($member) {
+        if ($member['mem_status'] == 0) {
             echo json_encode(['code' => 0, 'msg' => '此帳號已被停權']);
         } else {
-            unset($admin['am_psw']); // Remove password for security
-            echo json_encode(['code' => 1, 'adminInfo' => $admin]);
+            unset($member['mem_psw']); // Remove password for security
+            echo json_encode(['code' => 1, 'adminInfo' => $member]);
         }
     } else {
         echo json_encode(['code' => 0, 'msg' => '帳號未找到或密碼錯誤']);
