@@ -17,12 +17,12 @@ try {
     ];
 
     // SQL查詢
-    $sql = "SELECT * FROM bento_list";
-    $bentolists = $pdo->query($sql);
-    $bentolistRows = $bentolists->fetchAll(PDO::FETCH_ASSOC);
+    $sql = "SELECT * FROM diary JOIN member on dm_mem = mem_id";
+    $diarys = $pdo->query($sql);
+    $diaryRows = $diarys->fetchAll(PDO::FETCH_ASSOC);
 
     // 將查詢結果賦值給返回資料
-    $returnData['data']['list'] = $bentolistRows;
+    $returnData['data']['list'] = $diaryRows;
 } catch (Exception $e) {
     // 捕獲異常並設置錯誤代碼和錯誤信息
     $returnData['code'] = 10003;

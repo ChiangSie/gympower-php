@@ -36,7 +36,7 @@ try {
         $maxMemId = $maxMemIdStmt->fetchColumn() + 1;
 
         // Insert new member record
-        $sql = "INSERT INTO members (mem_id, mem_name, mem_acc, mem_email, mem_phone, mem_psw, mem_status, mem_img) 
+        $sql = "INSERT INTO member (mem_id, mem_name, mem_acc, mem_email, mem_phone, mem_psw, mem_status, mem_img) 
                 VALUES (:mem_id, :mem_name, :mem_acc, :mem_email, :mem_phone, :mem_psw, :mem_status, :mem_img)";
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(":mem_id", $maxMemId);
@@ -44,7 +44,7 @@ try {
         $stmt->bindValue(":mem_acc", $mem_acc);
         $stmt->bindValue(":mem_email", $mem_email);
         $stmt->bindValue(":mem_phone", $mem_phone);
-        $stmt->bindValue(":mem_psw", password_hash($mem_psw, PASSWORD_DEFAULT)); // Hash the password
+        $stmt->bindValue(":mem_psw", $mem_psw); 
         $stmt->bindValue(":mem_status", $mem_status);
         $stmt->bindValue(":mem_img", $mem_img, PDO::PARAM_LOB);
 
