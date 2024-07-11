@@ -12,19 +12,19 @@ try {
     // 取得資料
     $coach_id = $data["coach_id"];
     $coach_img = $data["coach_img"];
-    $coach_licc = $data["coach_licc"];
-    $coach_info = $data["coach_info"];
+    $tag = $data["tag"];
+    $intro = $data["intro"];
     $coach_rcm = $data["coach_rcm"];
 
     // SQL 指令
-    $sql = "UPDATE coach SET coach_img = :coach_img, coach_licc = :coach_licc, coach_info = :coach_info, coach_rcm = :coach_rcm WHERE coach_id = :coach_id";
+    $sql = "UPDATE coach SET coach_img = :coach_img, tag = :tag, intro = :intro, coach_rcm = :coach_rcm WHERE coach_id = :coach_id";
 
     // 編譯 SQL 指令
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':coach_id', $coach_id);
     $stmt->bindValue(':coach_img', $coach_img);
-    $stmt->bindValue(':coach_licc', $coach_licc);
-    $stmt->bindValue(':coach_info', $coach_info);
+    $stmt->bindValue(':tag', $tag);
+    $stmt->bindValue(':intro', $intro);
     $stmt->bindValue(':coach_rcm', $coach_rcm);
 
     // 執行 SQL 指令
